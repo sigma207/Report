@@ -1,0 +1,221 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en" dir="ltr" id="html">
+<head>
+	<meta charset="utf-8">
+	<link rel="stylesheet" href="http://code.jquery.com/ui/1.11.2/themes/smoothness/jquery-ui.css">
+  	<!--<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">-->
+
+	<script src="http://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+	<script src="http://code.jquery.com/ui/1.11.2/jquery-ui.js"></script>
+	<!--<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>-->
+	<script>
+	var pageNo=0;
+	var pageCount=30;
+	var tickArr;
+	var symbolArr;
+	var baseUrl="http://122.152.162.81:8080/CfdCreativeBo/QUERY/";
+	var qtype="1019";
+	$(document).ready(function(){
+		init();
+		var d = new Date();
+
+		$( "#datepicker" ).datepicker();
+		$( "#datepicker" ).datepicker("option","dateFormat","yymmdd");
+		$( "#datepicker" ).val(d.yyyymmdd());
+		$("#pagedownbtn").click(function(){
+			//alert("pageNo="+pageNo+" tickArr/pageCount="+(tickArr.length/pageCount));
+			if(pageNo<tickArr.length/pageCount+1){
+				pageNo++;
+				loadPage();
+			}else{
+				alert("抱歉!最後一頁囉");
+			}
+		});
+		$("#pageupbtn").click(function(){
+			if(pageNo>0){
+				pageNo--;
+				loadPage();
+			}else{
+				alert("抱歉!第一頁囉");
+			}
+		});
+		//http://122.152.162.81:8080/CfdCreativeBo/QUERY/1018?symbolId=TXCC&beginDate=20141230&price=9320
+		//http://122.152.162.81:8080/CfdCreativeBo/QUERY/1018?symbolId=TXCC&date=20141224&price=9120
+
+		$("#qtype").on('change', function() {
+			qtype=this.value;
+			if(this.value=="1019"){
+				$("#1018view").hide();
+				$("#1019view").show();
+			}
+			if(this.value=="1018"){
+				$("#1019view").hide();
+				$("#1018view").show();
+			}
+		});
+
+		$("#qrybtn").click(function(){
+			//alert($("symbolId").id);
+			var symbolId=$("#symbolId").val();
+			symbolId=symbolArr[symbolId].split(",")[0];
+
+			var dateStr=$("#datepicker").val();
+			var stime=$("#stime").val();
+			var etime=$("#etime").val();
+			var execUrl=baseUrl+"1019?symbolId="+symbolId+"&beginDate="+dateStr+"&beginTime="+stime+"&endDate="+dateStr+"&endTime="+etime;
+
+			if(qtype=="1018"){
+				var price=$("#price").val();
+				execUrl=baseUrl+"1018?symbolId="+symbolId+"&date="+dateStr+"&price="+price;	
+			}
+
+			$.getJSON( execUrl, function( data ) {
+				$("#ticktable0 > thead > tr").remove();
+				$("#ticktable1 > thead > tr").remove();
+				var colStr=data.ch.split(",");
+				var thead="<tr>";
+				for(i=0;i<colStr.length;i++){
+					thead+="<th>"+colStr[i]+"</th>";
+				}
+				thead+="</tr>";
+				$("#ticktable0 > thead").append(thead);
+				$("#ticktable1 > thead").append(thead);
+				var cstr=data.c;
+				tickArr=cstr.split("|");
+				loadPage();
+			});
+		});
+	});
+
+	function init(){
+		var css=getUrlParameter("css");
+		cssFile="css/"+css+".css";
+		var cssLink = $("<link rel='stylesheet' type='text/css' href='"+cssFile+"'>");
+     	$("head").append(cssLink);
+		
+		var execUrl=baseUrl+"2025";
+		$.getJSON( execUrl, function( data ) {
+			var cstr=data.c;
+			symbolArr=cstr.split("|");
+			for(i=0;i<symbolArr.length;i++){
+				var symbolInfo=symbolArr[i].split(",");
+				//alert(symbolInfo[16]);
+				var name=symbolInfo[17];
+				if(i==0){
+					$("#symbolId").append("<option value=\""+i+"\" selected=\"selected\">"+name+"</option>");
+				}else{
+					$("#symbolId").append("<option value=\""+i+"\" >"+name+"</option>");
+				}
+			}
+
+		});
+	}
+
+	function loadPage(){
+		$("#ticktable0 > tbody > tr").remove();
+		$("#ticktable1 > tbody > tr").remove();
+		var count=0;
+		for(i=pageCount*pageNo;i<tickArr.length;i++){
+			var rowArr=tickArr[i].split(",")
+			var tr="<tr>";
+			for(j=0;j<rowArr.length;j++){
+				tr+="<td>"+rowArr[j]+"</td>";
+			}
+			tr+="</tr>";
+			if(count<pageCount/2){
+				$("#ticktable0 > tbody").append(tr);
+			}else{
+				$("#ticktable1 > tbody").append(tr);
+			}
+
+			count++;
+			if(count>=pageCount){
+				break;
+			}
+		}
+	}
+
+	function getUrlParameter(sParam)
+	{
+	    var sPageURL = window.location.search.substring(1);
+	    var sURLVariables = sPageURL.split('&');
+	    for (var i = 0; i < sURLVariables.length; i++) 
+	    {
+	        var sParameterName = sURLVariables[i].split('=');
+	        if (sParameterName[0] == sParam) 
+	        {
+	            return sParameterName[1];
+	        }
+	    }
+	}
+
+	Date.prototype.yyyymmdd = function() {
+	   var yyyy = this.getFullYear().toString();
+	   var mm = (this.getMonth()+1).toString(); // getMonth() is zero-based
+	   var dd  = this.getDate().toString();
+	   return yyyy + (mm[1]?mm:"0"+mm[0]) + (dd[1]?dd:"0"+dd[0]); // padding
+	  };
+	</script>
+</head>
+<body>
+	<center>
+		<table>
+			<tr style="background:#ffffff">
+				<td>
+					商品：
+				</td>
+				<td>
+					<select id="symbolId" class="form-control">
+					</select>
+				</td>
+				<td>
+					日期：
+				</td>
+				<td>
+					<input type="text" id="datepicker" class="form-control">
+				</td>
+				<td>
+					條件：
+				</td>
+				<td>
+					<select id="qtype" class="form-control">
+						<option value="1019">時間</option>
+						<option value="1018">價格</option>
+					</select>
+				</td>
+				<td>
+					<button id="qrybtn" class="btn btn-default">送出</button>
+				</td>
+			</tr>
+		</table>
+		<div id="1019view">
+				開始：<input type="text" id="stime" class="form-control" value="08:30:00">
+				結束：<input type="text" id="etime" class="form-control" value="14:00:00">
+			</div>
+			<div id="1018view" hidden>
+				價格<input type="text" id="price" class="form-control" value="">
+			</div>	
+		<table width="100%">
+			<tr style="background:#ffffff">
+				<td width="49%">	
+					<table id="ticktable0"  width="100%">
+						<thead></thead>
+						<tbody></tbody>
+					</table>
+				</td>
+				<td width="2%">
+				</td>	
+				<td width="49%">
+					<table id="ticktable1"  width="100%">
+						<thead></thead>
+						<tbody></tbody>
+					</table>
+				</td>
+			</tr>
+		</table>
+				<button id="pageupbtn" class="btn btn-default">上一頁</button>
+			<button id="pagedownbtn" class="btn btn-default">下一頁</button>
+	<center/>
+	
+</body>
+</html>	
