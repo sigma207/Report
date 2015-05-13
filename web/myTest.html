@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>myTest</title>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+    <script type="text/javascript" src="js/dataLoad.js"></script>
+    <script type="text/javascript" src="js/reportTable.js"></script>
+    <script>
+        var reportTable1;
+        var reportTable2;
+        var reportDataManager;
+        var dataLoad;
+        $(document).ready(function () {
+            reportTable1 = ReportTable.createNew("reportTable1");
+            reportTable2 = ReportTable.createNew("reportTable2");
+            reportDataManager = ReportDataManager.createNew(true);
+            reportDataManager.addTable(reportTable1);
+            reportDataManager.addTable(reportTable2);
+            $(document).on("dataLoadComplete",onDataLoadComplete);
+            dataLoad = DataLoad.createNew();
+            dataLoad.getReportJSON("http://122.152.162.81:8080/cfdcreativebo/query/1019?symbolId=TFCC&beginDate=20150513&beginTime=08:45:00&endDate=20150513&endTime=13:45:05");
+        });
+        function onDataLoadComplete(e){
+            reportTable1.setReportColumns(dataLoad.reportColumns);
+            reportTable2.setReportColumns(dataLoad.reportColumns);
+            reportDataManager.setDataSource(dataLoad.reportData);
+        }
+    </script>
+</head>
+<body>
+<div class="reportTableContainer" style="width: 100%;">
+    <div class="reportTableBox" style="float: left;width: 49%;">
+        <table width="100%" class="reportTable reportTable1">
+            <thead>
+            <tr>
+            </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    </div>
+    <div class="reportTableBox" style="float: right;width: 49%;">
+        <table width="100%" class="reportTable reportTable2" >
+            <thead>
+            <tr>
+            </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+</body>
+</html>

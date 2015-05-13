@@ -9,21 +9,22 @@
 
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
     <script src="http://code.jquery.com/ui/1.11.2/jquery-ui.js"></script>
-    <script src="js/init.js"></script>
+    <script src="js/ultility.js"></script>
+    <script src="js/dataLoad.js"></script>
+    <script src="js/reportTable.js"></script>
     <!--<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>-->
     <script>
 
         var symbolArr;
         var qtype = "1019";
-        var rTable = new ReportTable();
+//        var rTable = new ReportTable();
         var defaultSymbol = "TFCC";
+        var reportTable1;
+        var reportTable2;
+        var reportDataManager;
+        var dataLoad;
 
         $(document).ready(function () {
-            //var loading=new Loading();
-            //loading.render();
-            //var d = new Date();
-
-
             $("#datepicker").datepicker();
             $("#datepicker").datepicker("option", "dateFormat", "yymmdd");
             $("#datepicker").val(today());
@@ -65,7 +66,7 @@
             setTimeSelect("etimehh", 24, stimeArr[0]);
             setTimeSelect("etimemm", 60, stimeArr[1]);
             setTimeSelect("etimess", 60, stimeArr[2]);
-            onQueryBtnClick();
+//            onQueryBtnClick();
         }
 
         function setTimeSelect(divName, max, value) {
@@ -85,7 +86,7 @@
         }
 
         function onQueryBtnClick() {
-            rTable.loadEmptyPage();
+//            rTable.loadEmptyPage();
             var symbolId = $("#symbolId").val();
             symbolId = symbolArr[symbolId].split("\u0002")[0];
 
@@ -108,7 +109,8 @@
                 var price = $("#price").val();
                 execUrl = baseUrl + "1018?symbolId=" + symbolId + "&date=" + dateStr + "&price=" + price;
             }
-            rTable.loadUrl(execUrl);
+//            rTable.loadUrl(execUrl);
+            dataLoad.getReportJSON(execUrl);
         }
 
         function init() {
@@ -137,10 +139,22 @@
                     }
                 }
                 onSymbolIdChange();
-                rTable.render("rtable");
+//                rTable.render("rtable");
             });
+            dataLoad = DataLoad.createNew();
+            reportTable1 = ReportTable.createNew("reportTable1");
+            reportTable2 = ReportTable.createNew("reportTable2");
+            reportDataManager = ReportDataManager.createNew(true);
+            reportDataManager.addTable(reportTable1);
+            reportDataManager.addTable(reportTable2);
+            $(document).on("dataLoadComplete",onDataLoadComplete);
         }
 
+        function onDataLoadComplete(e){
+            reportTable1.setReportColumns(dataLoad.reportColumns);
+            reportTable2.setReportColumns(dataLoad.reportColumns);
+            reportDataManager.setDataSource(dataLoad.reportData);
+        }
 
     </script>
 </head>
@@ -203,19 +217,27 @@
             時間：<label id="timeStr"></label>
         </td>
 </table>
-<table width="100%" class="reporttable">
-    <thead>
-    <tr>
-        <th field="column1">市場時間</th>
-        <th field="column2">口數</th>
-        <th field="column3">價格</th>
-        <th field="column4">次序</th>
-    </tr>
-    </thead>
-    <tbody>
-    </tbody>
-</table>
-<div id="rtable" style='height: 100%;'>
+<div class="reportTableContainer" style="width: 100%;">
+    <div class="reportTableBox" style="float: left;width: 49%;">
+        <table width="100%" class="reportTable reportTable1">
+            <thead>
+            <tr>
+            </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    </div>
+    <div class="reportTableBox" style="float: right;width: 49%;">
+        <table width="100%" class="reportTable reportTable2" >
+            <thead>
+            <tr>
+            </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    </div>
 </div>
 
 </body>

@@ -1,13 +1,156 @@
 /**
  * Created by user on 2015/5/12.
  */
-var DragTable = {
+var ReportDataManager = {
+    createNew: function (usePage) {
+        var rdm = {};
+        rdm.split = 0;
+        rdm.dataSource = [];
+        rdm.dataSize = rdm.dataSource.length;
+        rdm.reportTables = [];
+        rdm.reportDatas = [];
+        rdm.reportSize = 0;
+        rdm.usePage = usePage || false;
+        rdm.pageInit = false;
+        rdm.pageNo = 0;
+        rdm.pageCount = 30;
+
+
+        rdm.setDataSource = function (dataSource) {
+            rdm.dataSource = dataSource;
+            rdm.dataSize = rdm.dataSource.length;
+            rdm.allocateData();
+            rdm.refresh();
+            rdm.pageNo = 0;
+            if (!rdm.pageInit) {
+                rdm.addPageController();
+            }
+            if (rdm.usePage) {
+                rdm.renderPageInfo();
+            }
+        };
+
+        rdm.addTable = function (reportTable) {
+            reportTable.setReportDataManager(rdm);
+            rdm.reportTables.push(reportTable);
+            rdm.split++;
+        };
+
+        rdm.getTableRowCount = function () {
+            return rdm.pageCount / rdm.split;
+        };
+
+        rdm.getPageTotal = function () {
+            return Math.ceil(rdm.dataSize / rdm.pageCount);
+        };
+
+        rdm.getRowStartIndex = function () {
+            return (rdm.usePage) ? rdm.getTableRowCount() * rdm.pageNo : 0
+        };
+
+        rdm.allocateData = function () {
+            var tableRowCount = rdm.getTableRowCount();
+            rdm.reportDatas = [];
+            for (var s = 0; s < rdm.split; s++) {
+                rdm.reportDatas.push([]);
+            }
+            rdm.reportSize = rdm.reportDatas.length;
+            var rowIndex = 1;
+            var reportDataIndex = 0;
+            var currentReportData = rdm.reportDatas[reportDataIndex];
+            for (var i = 0; i < rdm.dataSize; i++) {
+                currentReportData.push(rdm.dataSource[i]);
+                if (rowIndex >= tableRowCount) {
+                    if (reportDataIndex == rdm.reportSize - 1) {
+                        reportDataIndex = 0;
+                    } else {
+                        reportDataIndex++;
+                    }
+                    currentReportData = rdm.reportDatas[reportDataIndex];
+                    rowIndex = 1;
+                } else {
+                    rowIndex++;
+                }
+            }
+        };
+
+        rdm.refresh = function () {
+            for (var i = 0; i < rdm.reportTables.length; i++) {
+                rdm.reportTables[i].setDataSource(rdm.reportDatas[i]);
+            }
+        };
+
+        rdm.addPageController = function () {
+            var pageButton = "<div class='reportPageButton' style='float: right;'>" +
+                "<button id='fpagebtn' class='btn btn-default'>第一頁</button>" +
+                "<button id='pageupbtn' class='btn btn-default'>上一頁</button>" +
+                "<button id='pagedownbtn' class='btn btn-default'>下一頁</button>" +
+                "<button id='lpagebtn' class='btn btn-default'>最末頁</button>" + "</div>";
+            var pageInfo = "<div class='reportPageInfo' style='float: left;'>" +
+                "當前第[<label id='pageIdxCount'>0/0</label>]頁" + "</div>";
+            var pageDiv = "<div class='reportPage'>" + pageInfo + pageButton + "</div>";
+            $(".reportTableContainer").after(pageDiv);
+            rdm.initPageButtonEvent();
+            rdm.pageInit = true;
+        };
+
+        rdm.initPageButtonEvent = function () {
+            $("#pagedownbtn").click(function () {
+                if (rdm.pageNo < rdm.getPageTotal() - 1) {
+                    rdm.pageNo++;
+                    console.log("rdm.pageNo="+rdm.pageNo);
+                    rdm.renderTableDom();
+                } else {
+                    alert("抱歉!最後一頁囉");
+                }
+            });
+            $("#pageupbtn").click(function () {
+                if (rdm.pageNo > 0) {
+                    rdm.pageNo--;
+                    rdm.renderTableDom();
+                } else {
+                    alert("抱歉!第一頁囉");
+                }
+            });
+            $("#fpagebtn").click(function () {
+                rdm.pageNo = 0;
+                rdm.renderTableDom();
+            });
+            $("#lpagebtn").click(function () {
+                rdm.pageNo = rdm.getPageTotal() - 1;
+                rdm.renderTableDom();
+            });
+        };
+
+        rdm.renderTableDom = function () {
+            for (var i = 0; i < rdm.reportTables.length; i++) {
+                rdm.reportTables[i].renderDom();
+            }
+            if (rdm.usePage) {
+                rdm.renderPageInfo();
+            }
+        };
+
+        rdm.renderPageInfo = function () {
+            console.log("rdm.pageNo="+rdm.pageNo);
+            $("#pageIdxCount").text((rdm.pageNo + 1) + "/" + rdm.getPageTotal());
+        };
+
+        return rdm;
+    }
+};
+
+var ReportTable = {
     createNew: function (tableClass) {
         var dt = {};//dragTable
         dt.tableClass = tableClass;
-        dt.$table = $("." + tableClass);
+        dt.$table = $("." + dt.tableClass);
         dt.$headTr = dt.$table.find("thead>tr");
         dt.$thArrowDiv;
+        dt.pageNo = 0;
+        dt.pageCount = 30;
+        dt.usePage = false;
+        dt.pageInit = false;
         /**
          * The temporary array of all thObj, It will be use when generateTr().
          * In order to reduce DOM operation.
@@ -28,9 +171,6 @@ var DragTable = {
 
         dt.DRAG_OVER_CLASS = "dragOverColumn";
         dt.BASIC_TH_CLASS = "basicTH";
-        dt.RISE_FALL_STYLE = "riseFallStyle";
-        dt.FOREX_RISE_CLASS = "forexRise";
-        dt.FOREX_FALL_CLASS = "forexFall";
         dt.STOCK_RISE_CLASS = "stockRiseZh";
         dt.STOCK_FALL_CLASS = "stockFallZh";
         dt.STOCK_CHANGE_COLOR_FIELD = "stockChangeColorField";
@@ -49,7 +189,12 @@ var DragTable = {
         dt.DATA_TIME_FORMATE = "HHmmss";
         dt.DISPLAY_TIME_FORMATE = "HH:mm:ss";
 
-        dt.init = function () {
+        dt.rdm = null;
+        dt.setReportDataManager = function (rdm) {
+            dt.rdm = rdm;
+        };
+
+        dt.initTHead = function () {
             dt.initColumnField();
             var $th;
             for (var colIndex = 0; colIndex < dt.columnSize; colIndex++) {
@@ -98,7 +243,6 @@ var DragTable = {
                 "decimal": $th.attr(dt.DECIMAL) || 0,
                 "field": $th.attr(dt.FIELD),
                 "stockChangeColorField": $th.attr(dt.STOCK_CHANGE_COLOR_FIELD),
-                "riseFallStyle": $th.attr(dt.RISE_FALL_STYLE),
                 "orderBy": $th.attr(dt.ORDER_BY),
                 "display": $th.css("display"),
                 "arrowDiv": $th.find(dt.ARROW_DIV),
@@ -157,6 +301,26 @@ var DragTable = {
             dt.renderDom();
         };
 
+        dt.setReportColumns = function (columns) {
+            dt.$headTr.empty();
+            var template = "";
+
+            for (var i = 0; i < columns.length; i++) {
+                template += "<th";
+                template += " field='column" + i + "'>" + columns[i];
+                template += "</th>";
+            }
+
+            $("." + tableClass + ">thead>tr").html(template);
+            dt.$table = $("." + dt.tableClass);
+            dt.$headTr = dt.$table.find("thead>tr");
+            dt.initTHead();
+            //dt.pageNo = 0;
+            //if (!dt.pageInit) {
+            //    dt.addPageController();
+            //}
+        };
+
         /**
          * Getting the th list.
          * @returns JQuery list
@@ -204,7 +368,6 @@ var DragTable = {
         };
 
         /**
-         *
          * @param sortIndex
          * @param changeOrderBy
          */
@@ -253,29 +416,36 @@ var DragTable = {
             //console.time("renderDom");
             dt.refreshThObjList();//refresh thObjList
             dt.renderTBody = "";
-            for (var rowIndex = 0; rowIndex < dt.dataSize; rowIndex++) {
+            var count = 0;
+            var tableRowCount = dt.rdm.getTableRowCount();
+            for (var rowIndex = dt.rdm.getRowStartIndex(); rowIndex < dt.dataSize; rowIndex++) {
                 dt.renderTBody += dt.generateTr(rowIndex);
+                if (dt.rdm.usePage)count++;
+                if (count >= tableRowCount) {
+                    break;
+                }
             }
             dt.$table.find("tbody").html(dt.renderTBody);
             dt.trList = dt.$table.find("tbody").children();
-            dt.trList.each(function(index){
+            dt.trList.each(function (index) {
                 $(this).click(dt.onRowClick);
             });
+
             //console.timeEnd("renderDom");
         };
 
-        dt.onRowClick = function(e){
+        dt.onRowClick = function (e) {
             var tr = e.currentTarget;
             //var evt = new Event("rowClick");
             var tableClass = dt.tableClass;
             var rowIndex = $(tr).attr("rowIndex");
             var rowData = dt.data[rowIndex];
-            $( document ).trigger( "rowClick", [ tableClass, rowIndex,rowData ] );
+            $(document).trigger("rowClick", [tableClass, rowIndex, rowData]);
             //document.dispatchEvent(evt);
         };
 
         dt.generateTr = function (rowIndex) {
-            var tr = "<tr rowIndex='"+rowIndex+"'>";
+            var tr = "<tr rowIndex='" + rowIndex + "'>";
             var thObj;
             for (var colIndex = 0; colIndex < dt.columnSize; colIndex++) {
                 thObj = dt.thObjList[colIndex];
@@ -297,41 +467,13 @@ var DragTable = {
             var tdClass = dt.generateTdClass(thObj, rowData);
             var tdStyle = dt.generateStyle(thObj.display);
             var tdValue = dt.generateValue(thObj, rowData);
-            tdValue = dt.generateTdDiv(thObj,rowData,tdValue);
             return "<td" + tdClass + tdStyle + ">" + tdValue + "</td>";
-        };
-
-        dt.generateTdDiv = function(thObj,rowData,tdValue){
-            var stockChangeColorField = thObj[dt.STOCK_CHANGE_COLOR_FIELD];
-            var tdDiv = "";
-            var divClass = "";
-            var afterDiv = "";
-            var riseFallStyle = thObj[dt.RISE_FALL_STYLE];
-            if (typeof riseFallStyle !== typeof undefined && riseFallStyle !== false) {
-                var change = rowData[stockChangeColorField];
-                if(riseFallStyle=="forex"){
-                    if (change >= 0) {
-                        divClass += " " + dt.FOREX_RISE_CLASS;
-                        afterDiv += "<div class='forexRiseArrow'></div>";
-                    } else {
-                        divClass += " " + dt.FOREX_FALL_CLASS;
-                        afterDiv += "<div class='forexFallArrow'></div>";
-                    }
-                }
-            }
-            if(divClass!=""||afterDiv!=""){
-                tdDiv = "<div class='"+divClass+"'>"+tdValue+"</div>"+afterDiv;
-            }else{
-                tdDiv = tdValue;
-            }
-            return tdDiv;
         };
 
         dt.generateTdClass = function (thObj, rowData) {
             var type = thObj[dt.COLUMN_TYPE];
             var externalClass = thObj.externalClass;
             var stockChangeColorField = thObj[dt.STOCK_CHANGE_COLOR_FIELD];
-            var riseFallStyle = thObj[dt.RISE_FALL_STYLE];
 
             var tdClass = "";
             if (type == "number" || type == "rate" || type == "date" || type == "time") {
@@ -343,16 +485,11 @@ var DragTable = {
             //rise and fall class
             if (typeof stockChangeColorField !== typeof undefined && stockChangeColorField !== false) {
                 var change = rowData[stockChangeColorField];
-                if (typeof riseFallStyle !== typeof undefined && riseFallStyle !== false) {
-
+                if (change >= 0) {
+                    tdClass += " " + dt.STOCK_RISE_CLASS;
                 } else {
-                    if (change >= 0) {
-                        tdClass += " " + dt.STOCK_RISE_CLASS;
-                    } else {
-                        tdClass += " " + dt.STOCK_FALL_CLASS;
-                    }
+                    tdClass += " " + dt.STOCK_FALL_CLASS;
                 }
-
             }
             if (typeof externalClass !== typeof undefined && externalClass !== false) {
                 tdClass += " " + externalClass;
@@ -420,7 +557,7 @@ var DragTable = {
 
         dt.dragEnd = function (e) {
             dt.eventLog("dragEnd");
-            //�쥻��bdr.drop(),���p�Gdrop�bth�H�~���a��N���|Ĳ�odrop
+            //原本放在dr.drop(),但如果drop在th以外的地方就不會觸發drop
             dt.getThList().removeClass(dt.DRAG_OVER_CLASS);
             dt.getThList().css("opacity", "1");
             //document.body.removeChild(dt.dragImgElement);
@@ -469,7 +606,10 @@ var DragTable = {
          * Function End
          * ------------------------------------------------------------------
          */
-        dt.init();
+        console.log("dt.$headTr.length=" + dt.$headTr.length);
+        if (dt.$headTr.length > 0) {
+            dt.initTHead();
+        }
         return dt;
     }
 };
