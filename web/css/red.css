@@ -13,7 +13,7 @@ body {
 	height: 100%;
 }
 
-.reporttable table {
+.reporttable {
     border-spacing: 0px;
 }
 
@@ -23,7 +23,7 @@ body {
     background-color: #B66269;
 }
 
-.reporttable table thead tr th {
+.reporttable thead tr th {
     padding: 0px;
     text-align: center;
     line-height: 25px;
@@ -32,7 +32,7 @@ body {
     color: #ffffff;
 }
 
-.reporttable table tbody tr td {
+.reporttable tbody tr td {
     padding: 0px;
     line-height: 25px;
     text-align: center;
@@ -137,4 +137,18 @@ button:active {
     top: 1px;
 }
 
+.arrowDiv {
+    position: relative;
+}
 
+.descArrow {
+    display: inline-block;
+    border: 5px solid;
+    border-color: #70FF90 transparent transparent transparent;
+}
+
+.ascArrow {
+    display: inline-block;
+    border: 5px solid;
+    border-color: transparent transparent #70FF90 transparent;
+}

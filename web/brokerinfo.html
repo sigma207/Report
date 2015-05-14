@@ -1,156 +1,177 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+		"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en" dir="ltr" id="html">
 <head>
 	<meta charset="utf-8">
 	<link rel="stylesheet" href="http://code.jquery.com/ui/1.11.2/themes/smoothness/jquery-ui.css">
-  	<!--<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">-->
+	<!--<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">-->
 
 	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
 	<script src="http://code.jquery.com/ui/1.11.2/jquery-ui.js"></script>
-	<script src="js/init.js"></script>
+	<script src="js/utility.js"></script>
+	<script src="js/dataLoad.js"></script>
+	<script src="js/reportTable.js"></script>
 	<!--<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>-->
 	<script>
-	
-	var symbolArr;
-	var qtype="1019";
-	var rTable=new ReportTable();
-	var tDialog;
-	
-	$(document).ready(function(){
-		rTable.setColumn(1);
-		rTable.setAutoReflash(true);
 
-		var d = new Date();
+		var symbolArr;
+		var qtype = "1019";
+		var tDialog;
+		var reportTable1;
+		var reportDataManager;
+		var dataLoad;
 
-		$( "#edatepicker" ).datepicker();
-		$( "#edatepicker" ).datepicker("option","dateFormat","yymmdd");
-		$( "#edatepicker" ).val(today());
-		$( "#sdatepicker" ).datepicker();
-		$( "#sdatepicker" ).datepicker("option","dateFormat","yymmdd");
-		$( "#sdatepicker" ).val(today());
-		init();
+		$(document).ready(function () {
 
-		$("#news_type").on("change",function(){
-			onNewsTypeChange();
+			var d = new Date();
+
+			$("#edatepicker").datepicker();
+			$("#edatepicker").datepicker("option", "dateFormat", "yymmdd");
+			$("#edatepicker").val(today());
+			$("#sdatepicker").datepicker();
+			$("#sdatepicker").datepicker("option", "dateFormat", "yymmdd");
+			$("#sdatepicker").val(today());
+			init();
+
+			$("#news_type").on("change", function () {
+				onNewsTypeChange();
+			});
+
+
+			$("#qrybtn").click(function () {
+				onQueryBtnClick();
+			});
+			$("#setbtn").click(function () {
+				tDialog.dialog("open");
+			});
+
+			$("#teacherCencelBtn").click(function () {
+				tDialog.dialog("close");
+			});
+
+			$("#teacherOkBtn").click(function () {
+				tDialog.dialog("close");
+			});
 		});
 
-		
-		$("#qrybtn").click(function(){
-			onQueryBtnClick();
-		});
-		$("#setbtn").click(function(){
-			tDialog.dialog("open");
-		});
-
-		$("#teacherCencelBtn").click(function(){
-			tDialog.dialog("close");
-		});
-
-		$("#teacherOkBtn").click(function(){
-			tDialog.dialog("close");
-		});
-	});
-
-	function onNewsTypeChange(){
-		/*
-		var symbolId=$("#symbolId").val();
-		var symbolInfo=symbolArr[symbolId].split('\u0002');
-		$("#datepicker").val(symbolInfo[2]);
-		$("#stime").val(hhmmssTohh_mm_ss(symbolInfo[4]));
-		$("#etime").val(hhmmssTohh_mm_ss(symbolInfo[6]));
-		*/
-	}
-
-	function onQueryBtnClick(){
-		//var teacherId=$("#symbolId").val();
-		var sDateStr=$("#sdatepicker").val();
-		var eDateStr=$("#edatepicker").val();
-		var execUrl=baseUrl+"2042?beginDate="+sDateStr+"&endDate="+eDateStr;
-		rTable.loadUrl(execUrl);
-	}
-
-	function init(){
-		
-		if(getUrlParameter("css")){
-			css=getUrlParameter("css");
+		function onNewsTypeChange() {
+			/*
+			 var symbolId=$("#symbolId").val();
+			 var symbolInfo=symbolArr[symbolId].split('\u0002');
+			 $("#datepicker").val(symbolInfo[2]);
+			 $("#stime").val(hhmmssTohh_mm_ss(symbolInfo[4]));
+			 $("#etime").val(hhmmssTohh_mm_ss(symbolInfo[6]));
+			 */
 		}
-		cssFile="css/"+css+".css";
-		var cssLink = $("<link rel='stylesheet' type='text/css' href='"+cssFile+"'>");
-     	$("head").append(cssLink);
-     	tDialog=$( "#teacherDialog" ).dialog(
-     		{
-     			width: 450,     				
-      			autoOpen: false
-      	});
-     	
-     	
-     	var execUrl=baseUrl+"2045";
-		$.getJSON( execUrl, function( data ) {
-			
-			var cstr=data.c;
-			symbolArr=cstr.split('\u0003');
-			for(i=0;i<symbolArr.length;i++){
-				$("#teacherList").append("<div><input class='ui-checkbox' type='checkbox' checked='checked' ><label for='check' class='ui-widget'>"+symbolArr[i]+"</label></div>");
-				//$("#teacherId").append("<option value=\""+i+"\">"+symbolArr[i]+"</option>");
+
+		function onQueryBtnClick() {
+			//var teacherId=$("#symbolId").val();
+			var sDateStr = $("#sdatepicker").val();
+			var eDateStr = $("#edatepicker").val();
+			var execUrl = baseUrl + "2042?beginDate=" + sDateStr + "&endDate=" + eDateStr;
+			dataLoad.getReportJSON(execUrl, onReportDataComplete);
+		}
+
+		function init() {
+
+			if (getUrlParameter("css")) {
+				css = getUrlParameter("css");
 			}
-			
-			
-		});
+			cssFile = "css/" + css + ".css";
+			var cssLink = $("<link rel='stylesheet' type='text/css' href='" + cssFile + "'>");
+			$("head").append(cssLink);
+			tDialog = $("#teacherDialog").dialog(
+					{
+						width: 450,
+						autoOpen: false
+					});
 
-		rTable.render("rtable");
-		var map={"F": "期貨", "S": "股票"};
+			dataLoad = DataLoad.createNew();
+			var execUrl = baseUrl + "2045";
+			dataLoad.getCommonJSON(execUrl, onSymbolDataComplete);
+			reportTable1 = ReportTable.createNew("reportTable1");
+			reportDataManager = ReportDataManager.createNew(true);
+			reportDataManager.addTable(reportTable1);
+		}
 
-		rTable.replace(0,map);
-		onQueryBtnClick();
-	}
+		function onReportDataComplete() {
+			var column = dataLoad.loadCh;
+			var columnTypes = [];
+
+			column = column.map(function (elm, index, array) {
+				if(elm=="F"){
+					return "期貨";
+				}else if(elm=="S"){
+					return "股票";
+				}else{
+					return elm;
+				}
+			});
+
+			for (var i = 0; i < dataLoad.loadCh.length; i++) {
+				columnTypes.push("text");
+			}
+			reportTable1.setReportColumns(column, columnTypes);
+			reportDataManager.setDataSource(column);
+		}
+
+		function onSymbolDataComplete() {
+			symbolArr = dataLoad.loadC;
+			var count = symbolArr.length;
+			for (var i = 0; i < count; i++) {
+				$("#teacherList").append("<div><input class='ui-checkbox' type='checkbox' checked='checked' ><label for='check' class='ui-widget'>" + symbolArr[i] + "</label></div>");
+			}
+		}
 	</script>
 </head>
 <body>
-	<table>
-			<tr style="background:#ffffff">
-				<td>
-					開始時間：
-				</td>
-				<td>
-					<input type="text" id="sdatepicker" class="form-control">
-				</td>
-				<td>
-					結束時間：
-				</td>
-				<td>
-					<input type="text" id="edatepicker" class="form-control">
-					
-				</td>
-				<td>
-					<button id="qrybtn" class="btn btn-default">送出</button>
-				</td>
-			</tr>
-			<tr>
-				<td>
-					<select id="news_type" class="form-control">
-						<option value="all" selected="selected">全部</option>
-						<option value="股票">股票</option>
-						<option value="期貨">期貨</option>
-					</select>
-				</td>	
-				<td style="text-align: left;">
-					<button id="setbtn" class="btn btn-default">老師人物設定</button>
-				</td>
-			</tr>
-		</table>
-		<div id="rtable">
-		</div>
-		<div id="teacherDialog" title="老師人物設定">
-			<button id="selectAllBtn" class="btn btn-default">全選</button>
-			<button id="unselectAllBtn" class="btn btn-default">全不選</button>
-			<div id="teacherList">
-			</div>
-			<HR>
-			<center>
-				<button id="teacherOkBtn" class="btn btn-default">確定</button>
-				<button id="teacherCencelBtn" class="btn btn-default">取消</button>
-			</center>
-		  <p></p>
-		</div>
+<table>
+	<tr style="background:#ffffff">
+		<td>
+			開始時間：
+		</td>
+		<td>
+			<input type="text" id="sdatepicker" class="form-control">
+		</td>
+		<td>
+			結束時間：
+		</td>
+		<td>
+			<input type="text" id="edatepicker" class="form-control">
+
+		</td>
+		<td>
+			<button id="qrybtn" class="btn btn-default">送出</button>
+		</td>
+	</tr>
+	<tr>
+		<td>
+			<select id="news_type" class="form-control">
+				<option value="all" selected="selected">全部</option>
+				<option value="股票">股票</option>
+				<option value="期貨">期貨</option>
+			</select>
+		</td>
+		<td style="text-align: left;">
+			<button id="setbtn" class="btn btn-default">老師人物設定</button>
+		</td>
+	</tr>
+</table>
+<div class="reportTableContainer" style="width: 100%;">
+	<table width="100%" class="reporttable reportTable1"></table>
+</div>
+
+<div id="teacherDialog" title="老師人物設定">
+	<button id="selectAllBtn" class="btn btn-default">全選</button>
+	<button id="unselectAllBtn" class="btn btn-default">全不選</button>
+	<div id="teacherList">
+	</div>
+	<HR>
+	<center>
+		<button id="teacherOkBtn" class="btn btn-default">確定</button>
+		<button id="teacherCencelBtn" class="btn btn-default">取消</button>
+	</center>
+	<p></p>
+</div>
 </body>
 </html>	

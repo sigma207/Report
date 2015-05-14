@@ -1,11 +1,19 @@
-
-input,textarea,select,option,button,table{ 
-	font-family: "Microsoft JhengHei";
-    -webkit-font-smoothing: antialiased;
-    font-weight: normal;
+html {
+	height: 100%;
 }
 
-.reporttable table {
+input, textarea, select, option, button, table {
+	font-family: "Microsoft JhengHei";
+	-webkit-font-smoothing: antialiased;
+	font-weight: normal;
+}
+
+body {
+
+	height: 100%;
+}
+
+.reporttable {
 	border-spacing: 0px;
 }
 
@@ -14,7 +22,8 @@ input,textarea,select,option,button,table{
 	text-align: center;
 	background-color: #000000;
 }
-.reporttable table thead tr th{
+
+.reporttable thead tr th {
 	padding: 0px;
 	text-align: center;
 	line-height: 25px;
@@ -22,50 +31,56 @@ input,textarea,select,option,button,table{
 	background-color: #000000;
 	color: #ffffff;
 }
-.reporttable table tbody tr td{
+
+.reporttable tbody tr td {
 	padding: 0px;
 	line-height: 25px;
 	text-align: center;
 	font-size: 13px;
 }
 
-.reporttable tbody tr:nth-child(even){
-	color: #FFFFFF;
-	background: #3F3F3F;
-}
-.reporttable tbody tr:nth-child(odd){
-	color: #FFFFFF;
-	background: #333333;
+.reporttable tbody tr:nth-child(even) {
+	color: #333333;
+	background: #F4F4F4;
 }
 
-select{
-	color:#ffffff;
+.reporttable tbody tr:nth-child(odd) {
+	color: #333333;
+	background: #FFFFFF;
+}
+
+select {
 	-webkit-appearance: button;
 	-webkit-border-radius: 2px;
 	background-image: url(images/select_down.png), -webkit-linear-gradient(#CACACA, #CACACA 5%, #7A7A7A);
-   	background-position: 97% center;
-  	background-repeat: no-repeat;
+	background-position: 97% center;
+	background-repeat: no-repeat;
 	border-radius: 2px;
 	padding: 3px 60px 3px 10px;
 	border: 1px solid #7A7A7A;
-	margin-right: 5px;
-	margin-left: 5px;
+	margin-right: 3px;
+	margin-left: 3px;
 }
 
-option{
-	color:#000000;
-}
-.datetimeselect{
-	width:45px;
-	padding-right:0px;
-	padding-left:1px;
+option:hover {
+	color: blue;
 }
 
-input[type="text"]{
+option {
+	color: #000000;
+}
+
+.datetimeselect {
+	width: 45px;
+	padding-right: 0px;
+	padding-left: 1px;
+}
+
+input[type="text"] {
 	-webkit-appearance: button;
 	-webkit-border-radius: 2px;
 	background-position: 97% center;
-  	background-repeat: no-repeat;
+	background-repeat: no-repeat;
 	border-radius: 2px;
 	padding: 3px;
 	border: 1px solid #7A7A7A;
@@ -73,32 +88,30 @@ input[type="text"]{
 	margin-left: 5px;
 }
 
-
-
 button {
-	background:-webkit-gradient(linear, left top, left bottom, color-stop(0.05, #B3B3B3), color-stop(1, #333333));
-	background:-moz-linear-gradient(top, #B3B3B3 5%, #333333 100%);
-	background:-webkit-linear-gradient(top, #B3B3B3 5%, #333333 100%);
-	background:-o-linear-gradient(top, #B3B3B3 5%, #333333 100%);
-	background:-ms-linear-gradient(top, #B3B3B3 5%, #333333 100%);
-	background:linear-gradient(to bottom, #B3B3B3 5%, #333333 100%);
-	filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#B3B3B3', endColorstr='#333333',GradientType=0);
-	background-color:#B3B3B3;
-	-moz-border-radius:3px;
-	-webkit-border-radius:3px;
-	border-radius:3px;
-	display:inline-block;
-	cursor:pointer;
-	color:#ffffff;
-	font-family:arial;
-	font-size:13px;
-	font-weight:bold;
-	text-decoration:none;
-	padding-left: 15px;
-	padding-right: 15px;
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0.05, #B3B3B3), color-stop(1, #333333));
+	background: -moz-linear-gradient(top, #B3B3B3 5%, #333333 100%);
+	background: -webkit-linear-gradient(top, #B3B3B3 5%, #333333 100%);
+	background: -o-linear-gradient(top, #B3B3B3 5%, #333333 100%);
+	background: -ms-linear-gradient(top, #B3B3B3 5%, #333333 100%);
+	background: linear-gradient(to bottom, #B3B3B3 5%, #333333 100%);
+	filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#B3B3B3', endColorstr='#333333', GradientType=0);
+	background-color: #B3B3B3;
+	-moz-border-radius: 3px;
+	-webkit-border-radius: 3px;
+	border-radius: 3px;
+	display: inline-block;
+	cursor: pointer;
+	color: #ffffff;
+	font-family: arial;
+	font-size: 13px;
+	font-weight: bold;
+	text-decoration: none;
 	border: 0px;
 	margin-right: 5px;
-	margin-left: 5px;	
+	margin-left: 5px;
+	padding-left: 15px;
+	padding-right: 15px;
 }
 
 button:hover {
@@ -120,8 +133,22 @@ button:active {
 	background:-ms-linear-gradient(top, #8A8A8A 5%, #282828 100%);
 	background:linear-gradient(to bottom, #8A8A8A 5%, #282828 100%);
 	filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#8A8A8A', endColorstr='#282828',GradientType=0);
-	position:relative;
-	top:1px;
+	position: relative;
+	top: 1px;
 }
 
+.arrowDiv {
+	position: relative;
+}
 
+.descArrow {
+	display: inline-block;
+	border: 5px solid;
+	border-color: #70FF90 transparent transparent transparent;
+}
+
+.ascArrow {
+	display: inline-block;
+	border: 5px solid;
+	border-color: transparent transparent #70FF90 transparent;
+}

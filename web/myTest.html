@@ -22,9 +22,9 @@
             dataLoad.getReportJSON("http://122.152.162.81:8080/cfdcreativebo/query/1019?symbolId=TFCC&beginDate=20150513&beginTime=08:45:00&endDate=20150513&endTime=13:45:05");
         });
         function onDataLoadComplete(e){
-            reportTable1.setReportColumns(dataLoad.reportColumns);
-            reportTable2.setReportColumns(dataLoad.reportColumns);
-            reportDataManager.setDataSource(dataLoad.reportData);
+            reportTable1.setReportColumns(dataLoad.loadCh);
+            reportTable2.setReportColumns(dataLoad.loadCh);
+            reportDataManager.setDataSource(dataLoad.loadC);
         }
     </script>
 </head>

@@ -15,13 +15,13 @@ var ReportDataManager = {
         rdm.pageNo = 0;
         rdm.pageCount = 30;
 
-
         rdm.setDataSource = function (dataSource) {
             rdm.dataSource = dataSource;
             rdm.dataSize = rdm.dataSource.length;
+            rdm.pageNo = 0;
             rdm.allocateData();
             rdm.refresh();
-            rdm.pageNo = 0;
+
             if (!rdm.pageInit) {
                 rdm.addPageController();
             }
@@ -48,7 +48,18 @@ var ReportDataManager = {
             return (rdm.usePage) ? rdm.getTableRowCount() * rdm.pageNo : 0
         };
 
+        rdm.sortData = function (field, orderBy, type) {
+            if (type == "number" || type == "rate") {
+                JsonTool.sort(rdm.dataSource, field, orderBy);
+            } else {
+                JsonTool.sortString(rdm.dataSource, field, orderBy);
+            }
+            rdm.allocateData();
+            rdm.refresh();
+        };
+
         rdm.allocateData = function () {
+            console.time("allocateData");
             var tableRowCount = rdm.getTableRowCount();
             rdm.reportDatas = [];
             for (var s = 0; s < rdm.split; s++) {
@@ -72,6 +83,7 @@ var ReportDataManager = {
                     rowIndex++;
                 }
             }
+            console.timeEnd("allocateData");
         };
 
         rdm.refresh = function () {
@@ -98,7 +110,6 @@ var ReportDataManager = {
             $("#pagedownbtn").click(function () {
                 if (rdm.pageNo < rdm.getPageTotal() - 1) {
                     rdm.pageNo++;
-                    console.log("rdm.pageNo="+rdm.pageNo);
                     rdm.renderTableDom();
                 } else {
                     alert("抱歉!最後一頁囉");
@@ -132,7 +143,6 @@ var ReportDataManager = {
         };
 
         rdm.renderPageInfo = function () {
-            console.log("rdm.pageNo="+rdm.pageNo);
             $("#pageIdxCount").text((rdm.pageNo + 1) + "/" + rdm.getPageTotal());
         };
 
@@ -194,6 +204,15 @@ var ReportTable = {
             dt.rdm = rdm;
         };
 
+        dt.checkHeadBody = function () {
+            if (dt.$table.find("thead").length==0) {
+                dt.$table.append("<thead><tr></tr></thead>");
+            }
+            if (dt.$table.find("tbody").length==0) {
+                dt.$table.append("<tbody></tbody>");
+            }
+        };
+
         dt.initTHead = function () {
             dt.initColumnField();
             var $th;
@@ -203,7 +222,7 @@ var ReportTable = {
                     $th.attr(dt.COLUMN_TYPE, "text");
                 }
                 $th.attr(dt.ORDER_BY, "");
-                $th.addClass(dt.BASIC_TH_CLASS);
+                //$th.addClass(dt.BASIC_TH_CLASS);
                 //append the arrow div for sort
                 $th.append("<div class='" + dt.ARROW_DIV + "'></div>");
                 $th.on("click", dt.sortColumnClick);
@@ -271,7 +290,11 @@ var ReportTable = {
                     dateTimeFormat = dt.DISPLAY_TIME_FORMATE;
                     break;
             }
-
+            //thObj.format = "";
+            //thObj.originalFormat = "";
+            //thObj.dateTimeFormat = "";
+            //return thObj;
+            //先不要格式化..for report table
             thObj.format = format;
             thObj.originalFormat = originalFormat;
             thObj.dateTimeFormat = dateTimeFormat;
@@ -293,21 +316,21 @@ var ReportTable = {
             dt.data = newData;
             dt.dataSize = dt.data.length;
             var thList = dt.getThList();
-            //find unempty 'orderBy' attribute of th from thList.
-            var lastSortIndex = thList.filter("[" + dt.ORDER_BY + "='" + dt.DESC + "'],[" + dt.ORDER_BY + "='" + dt.ASC + "']").eq(0).index();
-            if (lastSortIndex != -1) {
-                dt.sortOrderBy(lastSortIndex, false);//keep last orderBy, so do not changes orderBy
-            }
+            ////find unempty 'orderBy' attribute of th from thList.
+            //var lastSortIndex = thList.filter("[" + dt.ORDER_BY + "='" + dt.DESC + "'],[" + dt.ORDER_BY + "='" + dt.ASC + "']").eq(0).index();
+            //if (lastSortIndex != -1) {
+            //    dt.sortOrderBy(lastSortIndex, false);//keep last orderBy, so do not changes orderBy
+            //}
             dt.renderDom();
         };
 
-        dt.setReportColumns = function (columns) {
+        dt.setReportColumns = function (columns,types) {
             dt.$headTr.empty();
             var template = "";
 
             for (var i = 0; i < columns.length; i++) {
                 template += "<th";
-                template += " field='column" + i + "'>" + columns[i];
+                template += " "+dt.FIELD+"='column" + i + "' "+ dt.COLUMN_TYPE+"='"+types[i]+"'>" + columns[i];
                 template += "</th>";
             }
 
@@ -315,10 +338,6 @@ var ReportTable = {
             dt.$table = $("." + dt.tableClass);
             dt.$headTr = dt.$table.find("thead>tr");
             dt.initTHead();
-            //dt.pageNo = 0;
-            //if (!dt.pageInit) {
-            //    dt.addPageController();
-            //}
         };
 
         /**
@@ -392,20 +411,18 @@ var ReportTable = {
             dt.$thArrowDiv.removeClass(dt.DESC_ARROW);
             dt.$thArrowDiv.removeClass(dt.ASC_ARROW);
 
+
             if (orderBy == dt.ASC) {
                 arrowDiv.addClass(dt.ASC_ARROW);
             } else {
                 arrowDiv.addClass(dt.DESC_ARROW);
             }
 
-            if (type == "number" || type == "rate") {
-                JsonTool.sort(dt.data, field, orderBy);
-            } else {
-                JsonTool.sortString(dt.data, field, orderBy);
-            }
+            dt.rdm.sortData(field, orderBy, type);
+
             thList.attr(dt.ORDER_BY, "");//empty 'orderBy' attribute of all th
             $th.attr(dt.ORDER_BY, orderBy);//set 'orderBy' attribute of this th
-            dt.renderDom();
+            //dt.renderDom();
         };
         /**
          * ------------------------------------------------------------------
@@ -425,6 +442,14 @@ var ReportTable = {
                     break;
                 }
             }
+            //fill empty tr for page
+            if (dt.rdm.usePage && count < tableRowCount) {
+                while (count < tableRowCount) {
+                    dt.renderTBody += dt.generateTr(rowIndex++);
+                    count++;
+                }
+            }
+
             dt.$table.find("tbody").html(dt.renderTBody);
             dt.trList = dt.$table.find("tbody").children();
             dt.trList.each(function (index) {
@@ -447,9 +472,10 @@ var ReportTable = {
         dt.generateTr = function (rowIndex) {
             var tr = "<tr rowIndex='" + rowIndex + "'>";
             var thObj;
+            var rowData = dt.data[rowIndex] || {};
             for (var colIndex = 0; colIndex < dt.columnSize; colIndex++) {
                 thObj = dt.thObjList[colIndex];
-                tr += dt.generateTd(thObj, colIndex, dt.data[rowIndex]);
+                tr += dt.generateTd(thObj, colIndex, rowData);
             }
             tr += "</tr>";
             return tr;
@@ -511,13 +537,16 @@ var ReportTable = {
 
         dt.generateValue = function (thObj, rowData) {
             var value = rowData[thObj.field];
-            if (thObj.format != "") {
-                //console.log("format="+thObj.format+",value="+value);
-                return numeral(value).format(thObj.format);
-            } else if (thObj.dateTimeFormat != "") {
-                return moment(value, thObj.originalFormat).format(thObj.dateTimeFormat);
-            } else {
-                return value;
+            if (typeof(value) == "undefined") {
+                return "&nbsp;"
+            }else{
+                if (thObj.format != "") {
+                    return numeral(value).format(thObj.format);
+                } else if (thObj.dateTimeFormat != "") {
+                    return moment(value, thObj.originalFormat).format(thObj.dateTimeFormat);
+                } else {
+                    return value;
+                }
             }
         };
         /**
@@ -606,7 +635,8 @@ var ReportTable = {
          * Function End
          * ------------------------------------------------------------------
          */
-        console.log("dt.$headTr.length=" + dt.$headTr.length);
+
+        dt.checkHeadBody();
         if (dt.$headTr.length > 0) {
             dt.initTHead();
         }

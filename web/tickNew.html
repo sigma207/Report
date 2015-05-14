@@ -9,7 +9,7 @@
 
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
     <script src="http://code.jquery.com/ui/1.11.2/jquery-ui.js"></script>
-    <script src="js/ultility.js"></script>
+    <script src="js/utility.js"></script>
     <script src="js/dataLoad.js"></script>
     <script src="js/reportTable.js"></script>
     <!--<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>-->
@@ -17,7 +17,7 @@
 
         var symbolArr;
         var qtype = "1019";
-//        var rTable = new ReportTable();
+        //        var rTable = new ReportTable();
         var defaultSymbol = "TFCC";
         var reportTable1;
         var reportTable2;
@@ -54,7 +54,7 @@
 
         function onSymbolIdChange() {
             var symbolId = $("#symbolId").val();
-            var symbolInfo = symbolArr[symbolId].split('\u0002');
+            var symbolInfo = symbolArr[symbolId];
             $("#datepicker").val(symbolInfo[14]);
             $("#stime").val(hhmmssTohh_mm_ss(symbolInfo[4]));
             $("#etime").val(hhmmssTohh_mm_ss(symbolInfo[7]));
@@ -88,7 +88,7 @@
         function onQueryBtnClick() {
 //            rTable.loadEmptyPage();
             var symbolId = $("#symbolId").val();
-            symbolId = symbolArr[symbolId].split("\u0002")[0];
+            symbolId = symbolArr[symbolId][0];
 
             var dateStr = $("#datepicker").val();
             var eDateStr = $("#datepicker").val();
@@ -109,8 +109,7 @@
                 var price = $("#price").val();
                 execUrl = baseUrl + "1018?symbolId=" + symbolId + "&date=" + dateStr + "&price=" + price;
             }
-//            rTable.loadUrl(execUrl);
-            dataLoad.getReportJSON(execUrl);
+            dataLoad.getReportJSON(execUrl, onReportDataComplete);
         }
 
         function init() {
@@ -124,36 +123,35 @@
             var cssLink = $("<link rel='stylesheet' type='text/css' href='" + cssFile + "'>");
             $("head").append(cssLink);
 
-            var execUrl = baseUrl + "2025";
-            $.getJSON(execUrl, function (data) {
-
-                var cstr = data.c;
-                symbolArr = cstr.split('\u0003');
-                for (i = 0; i < symbolArr.length; i++) {
-                    var symbolInfo = symbolArr[i].split('\u0002');
-                    var name = symbolInfo[17];
-                    if (symbolInfo[0] == defaultSymbol) {
-                        $("#symbolId").append("<option value=\"" + i + "\" selected=\"selected\">" + name + "</option>");
-                    } else {
-                        $("#symbolId").append("<option value=\"" + i + "\" >" + name + "</option>");
-                    }
-                }
-                onSymbolIdChange();
-//                rTable.render("rtable");
-            });
             dataLoad = DataLoad.createNew();
+            var execUrl = baseUrl + "2025";
+            dataLoad.getCommonJSON(execUrl, onSymbolDataComplete);
             reportTable1 = ReportTable.createNew("reportTable1");
             reportTable2 = ReportTable.createNew("reportTable2");
             reportDataManager = ReportDataManager.createNew(true);
             reportDataManager.addTable(reportTable1);
             reportDataManager.addTable(reportTable2);
-            $(document).on("dataLoadComplete",onDataLoadComplete);
         }
 
-        function onDataLoadComplete(e){
-            reportTable1.setReportColumns(dataLoad.reportColumns);
-            reportTable2.setReportColumns(dataLoad.reportColumns);
-            reportDataManager.setDataSource(dataLoad.reportData);
+        function onReportDataComplete() {
+            var columnTypes = ["text", "number", "number", "number"];
+            reportTable1.setReportColumns(dataLoad.loadCh, columnTypes);
+            reportTable2.setReportColumns(dataLoad.loadCh, columnTypes);
+            reportDataManager.setDataSource(dataLoad.loadC);
+        }
+
+        function onSymbolDataComplete() {
+            symbolArr = dataLoad.loadC;
+            var count = symbolArr.length;
+            for (var i = 0; i < count; i++) {
+                var name = symbolArr[i][17];
+                if (symbolArr[i][0] == defaultSymbol) {
+                    $("#symbolId").append("<option value=\"" + i + "\" selected=\"selected\">" + name + "</option>");
+                } else {
+                    $("#symbolId").append("<option value=\"" + i + "\" >" + name + "</option>");
+                }
+            }
+            onSymbolIdChange();
         }
 
     </script>
@@ -218,25 +216,11 @@
         </td>
 </table>
 <div class="reportTableContainer" style="width: 100%;">
-    <div class="reportTableBox" style="float: left;width: 49%;">
-        <table width="100%" class="reportTable reportTable1">
-            <thead>
-            <tr>
-            </tr>
-            </thead>
-            <tbody>
-            </tbody>
-        </table>
+    <div style="float: left;width: 49%;">
+        <table width="100%" class="reporttable reportTable1"></table>
     </div>
-    <div class="reportTableBox" style="float: right;width: 49%;">
-        <table width="100%" class="reportTable reportTable2" >
-            <thead>
-            <tr>
-            </tr>
-            </thead>
-            <tbody>
-            </tbody>
-        </table>
+    <div style="float: right;width: 49%;">
+        <table width="100%" class="reporttable reportTable2"></table>
     </div>
 </div>
 
