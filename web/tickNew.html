@@ -1,50 +1,37 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
         "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en" dir="ltr" id="html">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en" dir="ltr" id="html" ng-app="myApp">
 <head>
     <meta charset="utf-8">
     <link rel="stylesheet" href="http://code.jquery.com/ui/1.11.2/themes/smoothness/jquery-ui.css">
 
     <!--<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">-->
-
+    <script src="js/angular.min.js"></script>
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
     <script src="http://code.jquery.com/ui/1.11.2/jquery-ui.js"></script>
     <script src="js/utility.js"></script>
+    <script src="js/moment.min.js"></script>
+    <script src="js/numeral.min.js"></script>
     <script src="js/dataLoad.js"></script>
     <script src="js/reportTable.js"></script>
     <!--<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>-->
-    <script>
-
+    <script type="text/javascript">
         var symbolArr;
         var qtype = "1019";
-        //        var rTable = new ReportTable();
         var defaultSymbol = "TFCC";
         var reportTable1;
         var reportTable2;
         var reportDataManager;
         var dataLoad;
-
         $(document).ready(function () {
-            $("#datepicker").datepicker();
-            $("#datepicker").datepicker("option", "dateFormat", "yymmdd");
-            $("#datepicker").val(today());
+            var datePicker = $("#datepicker");
+            datePicker.datepicker();
+            datePicker.datepicker("option", "dateFormat", "yymmdd");
+            datePicker.val(today());
             init();
 
             $("#symbolId").on("change", function () {
                 onSymbolIdChange();
-            });
-
-
-            $("#qtype").on('change', function () {
-                qtype = this.value;
-                if (this.value == "1019") {
-                    $("#1018view").hide();
-                    $("#1019view").show();
-                }
-                if (this.value == "1018") {
-                    $("#1019view").hide();
-                    $("#1018view").show();
-                }
             });
 
             $("#qrybtn").click(function () {
@@ -70,36 +57,27 @@
         }
 
         function setTimeSelect(divName, max, value) {
-            for (i = 0; i < max; i++) {
-                var tmp = "<option value='" + i + "'>" + i + "</option>";
-                if (i < 10) {
-                    tmp = "<option value='0" + i + "'>0" + i + "</option>";
-                }
-                if (value == i) {
-                    tmp = "<option value='" + i + "' selected>" + i + "</option>";
-                    if (i < 10) {
-                        tmp = "<option value='0" + i + "' selected>0" + i + "</option>";
-                    }
-                }
-                $("#" + divName).append(tmp);
+            var timeSelect = $("#" + divName);
+            timeSelect.empty();
+            var temp = "";
+            for (var i = 0; i < max; i++) {
+                temp += SelectTool.getTimeOptionHtml(i, i, (value == i));
             }
+            timeSelect.append(temp);
         }
 
         function onQueryBtnClick() {
-//            rTable.loadEmptyPage();
             var symbolId = $("#symbolId").val();
             symbolId = symbolArr[symbolId][0];
 
             var dateStr = $("#datepicker").val();
-            var eDateStr = $("#datepicker").val();
+            var eDateStr = dateStr;
             var stime = $("#stimehh").val() + ":" + $("#stimemm").val() + ":" + $("#stimess").val();//$("#stime").val();
             var etime = $("#etimehh").val() + ":" + $("#etimemm").val() + ":" + $("#etimess").val();//$("#etime").val();
             if (etime < stime) {
                 var newDate = new Date(dateStr.substring(0, 4) + "-" + dateStr.substring(4, 6) + "-" + dateStr.substring(6));
-                //alert(newDate);
                 newDate = new Date(newDate.setDate(newDate.getDate() + 1));
                 eDateStr = toYYYYMMDD(newDate);
-                //alert("end day +1"+newDate);
             }
 
             var execUrl = baseUrl + "1019?symbolId=" + symbolId + "&beginDate=" + dateStr + "&beginTime=" + stime + "&endDate=" + eDateStr + "&endTime=" + etime;
@@ -119,9 +97,7 @@
             if (getUrlParameter("css")) {
                 css = getUrlParameter("css");
             }
-            cssFile = "css/" + css + ".css";
-            var cssLink = $("<link rel='stylesheet' type='text/css' href='" + cssFile + "'>");
-            $("head").append(cssLink);
+            DomTool.appendCss("css/" + css + ".css");
 
             dataLoad = DataLoad.createNew();
             var execUrl = baseUrl + "2025";
@@ -143,20 +119,22 @@
         function onSymbolDataComplete() {
             symbolArr = dataLoad.loadC;
             var count = symbolArr.length;
+            var temp = "";
             for (var i = 0; i < count; i++) {
-                var name = symbolArr[i][17];
-                if (symbolArr[i][0] == defaultSymbol) {
-                    $("#symbolId").append("<option value=\"" + i + "\" selected=\"selected\">" + name + "</option>");
-                } else {
-                    $("#symbolId").append("<option value=\"" + i + "\" >" + name + "</option>");
-                }
+                temp += SelectTool.getOptionHtml(i, symbolArr[i][17], (symbolArr[i][0] == defaultSymbol));
             }
+            $("#symbolId").append(temp);
             onSymbolIdChange();
+        }
+
+        function MyController($scope){
+            $scope.queryType = [{value:"1019",label:"時間"},{value:"1018",label:"價格"}];
+            $scope.selectQueryType = $scope.queryType[0];
         }
 
     </script>
 </head>
-<body>
+<body ng-controller="MyController">
 <table>
     <tr style="background:#ffffff">
         <td style='font-color:#000000'>
@@ -176,9 +154,7 @@
             條件：
         </td>
         <td>
-            <select id="qtype" class="form-control">
-                <option value="1019">時間</option>
-                <option value="1018">價格</option>
+            <select id="qtype" class="form-control" ng-model="selectQueryType" ng-options="type.label for type in queryType">
             </select>
         </td>
         <td>
@@ -189,7 +165,7 @@
         <td colspan="2">
         </td>
         <td colspan="5" style="text-align: left;">
-            <div id="1019view">
+            <div id="1019view" ng-show="selectQueryType.value=='1019'">
                 開始：<input type="text" id="stime" class="form-control" value="" hidden>
                 <select id="stimehh" style='width:45px;padding-right:0px;padding-left:3px;'>
                 </select>時
@@ -205,7 +181,7 @@
                 <select id="etimess" style='width:45px;padding-right:0px;padding-left:3px;'>
                 </select>秒
             </div>
-            <div id="1018view" hidden>
+            <div id="1018view" ng-show="selectQueryType.value=='1018'">
                 價格<input type="text" id="price" class="form-control" value="">
             </div>
         </td>
@@ -217,12 +193,32 @@
 </table>
 <div class="reportTableContainer" style="width: 100%;">
     <div style="float: left;width: 49%;">
-        <table width="100%" class="reporttable reportTable1"></table>
+        <table width="100%" class="reporttable reportTable1">
+            <thead>
+            <tr>
+                <th field="column0">市場時間</th>
+                <th field="column1" type="number">口數</th>
+                <th field="column2" type="number">價格</th>
+                <th field="column3" type="number">次序</th>
+            </tr>
+            </thead>
+        </table>
     </div>
     <div style="float: right;width: 49%;">
-        <table width="100%" class="reporttable reportTable2"></table>
+        <table width="100%" class="reporttable reportTable2">
+            <thead>
+            <tr>
+                <th field="column0">市場時間</th>
+                <th field="column1" type="number">口數</th>
+                <th field="column2" type="number">價格</th>
+                <th field="column3" type="number">次序</th>
+            </tr>
+            </thead>
+        </table>
     </div>
 </div>
-
+<script type="text/javascript">
+    angular.module("myApp",[]).controller("MyController",MyController);
+</script>
 </body>
 </html>	
