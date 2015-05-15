@@ -11,14 +11,15 @@ function today() {
     var mm = (today.getMonth() + 1).toString(); // getMonth() is zero-based
     var dd = today.getDate().toString();
     return yyyy + (mm[1] ? mm : "0" + mm[0]) + (dd[1] ? dd : "0" + dd[0]); // padding
-};
+}
+
 function toYYYYMMDD(day) {
 
     var yyyy = day.getFullYear().toString();
     var mm = (day.getMonth() + 1).toString(); // getMonth() is zero-based
     var dd = day.getDate().toString();
     return yyyy + (mm[1] ? mm : "0" + mm[0]) + (dd[1] ? dd : "0" + dd[0]); // padding
-};
+}
 
 function hhmmssTohh_mm_ss(dateStr) {
     var str = dateStr.substring(0, 2) + ":" + dateStr.substring(2, 4) + ":" + dateStr.substring(4);
@@ -98,5 +99,20 @@ var DomTool = {
 
         parent1.insertBefore(elm2, next1);
         parent2.insertBefore(elm1, next2);
+    },
+    appendCss: function (href) {
+        $("head").append($("<link rel='stylesheet' type='text/css' href='" + href + "'>"));
+    }
+};
+
+var SelectTool = {
+    getTimeOptionHtml: function (value, text, selected) {
+        if(value<10)value="0"+value;
+        if(text<10)text="0"+text;
+        return SelectTool.getOptionHtml(value,text,selected);
+    },
+    getOptionHtml: function (value, text, selected) {
+        selected = (selected)?"selected":"";
+        return "<option value='" + value + "' " + (selected || "") + ">" + text + "</option>";
     }
 };
