@@ -114,5 +114,17 @@ var SelectTool = {
     getOptionHtml: function (value, text, selected) {
         selected = (selected)?"selected":"";
         return "<option value='" + value + "' " + (selected || "") + ">" + text + "</option>";
+    },
+    generateTimeOptions: function (max) {
+        var options = [];
+        var text = "";
+        for (var i = 0; i < max; i++) {
+            text = (i < 10) ? "0" + i : i.toString();
+            options.push({
+                value: text,
+                label: text
+            });
+        }
+        return options;
     }
 };
