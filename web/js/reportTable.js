@@ -20,6 +20,7 @@ var ReportDataManager = {
             rdm.dataSize = rdm.dataSource.length;
             rdm.pageNo = 0;
             rdm.allocateData();
+            rdm.clearSort();
             rdm.refresh();
 
             if (!rdm.pageInit) {
@@ -48,13 +49,14 @@ var ReportDataManager = {
             return (rdm.usePage) ? rdm.getTableRowCount() * rdm.pageNo : 0
         };
 
-        rdm.sortData = function (field, orderBy, type) {
+        rdm.sortData = function (sortIndex, field, orderBy, type) {
             if (type == "number" || type == "rate") {
                 JsonTool.sort(rdm.dataSource, field, orderBy);
             } else {
                 JsonTool.sortString(rdm.dataSource, field, orderBy);
             }
             rdm.allocateData();
+            rdm.updateSortColumn(sortIndex, orderBy);
             rdm.refresh();
         };
 
@@ -84,6 +86,18 @@ var ReportDataManager = {
                 }
             }
             console.timeEnd("allocateData");
+        };
+
+        rdm.updateSortColumn = function (sortIndex, orderBy) {
+            for (var i = 0; i < rdm.reportTables.length; i++) {
+                rdm.reportTables[i].updateSortColumn(sortIndex, orderBy);
+            }
+        };
+
+        rdm.clearSort = function () {
+            for (var i = 0; i < rdm.reportTables.length; i++) {
+                rdm.reportTables[i].clearSortColumn();
+            }
         };
 
         rdm.refresh = function () {
@@ -290,11 +304,6 @@ var ReportTable = {
                     dateTimeFormat = dt.DISPLAY_TIME_FORMATE;
                     break;
             }
-            //thObj.format = "";
-            //thObj.originalFormat = "";
-            //thObj.dateTimeFormat = "";
-            //return thObj;
-            //先不要格式化..for report table
             thObj.format = format;
             thObj.originalFormat = originalFormat;
             thObj.dateTimeFormat = dateTimeFormat;
@@ -383,7 +392,9 @@ var ReportTable = {
         };
 
         dt.sortColumnClick = function (e) {
-            dt.sortOrderBy($(this).index(), true);
+            if(dt.dataSize>0){
+                dt.sortOrderBy($(this).index(), true);
+            }
         };
 
         /**
@@ -397,19 +408,25 @@ var ReportTable = {
             if (changeOrderBy) {
                 currentOrderBy = (currentOrderBy == dt.ASC) ? dt.DESC : dt.ASC;
             }
-            dt.sortColumn(sortIndex, currentOrderBy);
+            dt.rdm.sortData(sortIndex, $th.attr(dt.FIELD), currentOrderBy, $th.attr(dt.COLUMN_TYPE));
         };
 
-        dt.sortColumn = function (sortIndex, orderBy) {
-            dt.log("sortIndex=" + sortIndex + ":" + orderBy);
+        dt.clearSortColumn = function () {
             var thList = dt.getThList();
-            var $th = dt.getThByIndex(sortIndex);
-            var type = $th.attr(dt.COLUMN_TYPE);
-            var field = $th.attr(dt.FIELD);
-            var arrowDiv = $th.find("." + dt.ARROW_DIV);
             //remove all arrow class
             dt.$thArrowDiv.removeClass(dt.DESC_ARROW);
             dt.$thArrowDiv.removeClass(dt.ASC_ARROW);
+            thList.attr(dt.ORDER_BY, "");//empty 'orderBy' attribute of all th
+        };
+
+        dt.updateSortColumn = function (sortIndex, orderBy) {
+            dt.clearSortColumn();
+            //var thList = dt.getThList();
+            var $th = dt.getThByIndex(sortIndex);
+            var arrowDiv = $th.find("." + dt.ARROW_DIV);
+            //remove all arrow class
+            //dt.$thArrowDiv.removeClass(dt.DESC_ARROW);
+            //dt.$thArrowDiv.removeClass(dt.ASC_ARROW);
 
 
             if (orderBy == dt.ASC) {
@@ -417,12 +434,8 @@ var ReportTable = {
             } else {
                 arrowDiv.addClass(dt.DESC_ARROW);
             }
-
-            dt.rdm.sortData(field, orderBy, type);
-
-            thList.attr(dt.ORDER_BY, "");//empty 'orderBy' attribute of all th
+            //thList.attr(dt.ORDER_BY, "");//empty 'orderBy' attribute of all th
             $th.attr(dt.ORDER_BY, orderBy);//set 'orderBy' attribute of this th
-            //dt.renderDom();
         };
         /**
          * ------------------------------------------------------------------

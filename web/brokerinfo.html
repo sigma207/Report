@@ -98,19 +98,15 @@
 			var column = dataLoad.loadCh;
 			var columnTypes = [];
 
-			column = column.map(function (elm, index, array) {
-				if(elm=="F"){
-					return "期貨";
-				}else if(elm=="S"){
-					return "股票";
-				}else{
-					return elm;
+			for(var i=0;i<column.length;i++){
+				if(column[i]=="F"){
+					column[i] ="期貨";
+				}else if(column[i]=="S"){
+					column[i] ="股票";
 				}
-			});
-
-			for (var i = 0; i < dataLoad.loadCh.length; i++) {
 				columnTypes.push("text");
 			}
+
 			reportTable1.setReportColumns(column, columnTypes);
 			reportDataManager.setDataSource(column);
 		}

@@ -137,6 +137,12 @@ button:active {
 	top: 1px;
 }
 
+.timeOption{
+	width:45px;
+	padding-right:0;
+	padding-left:3px;
+}
+
 .arrowDiv {
 	position: relative;
 }

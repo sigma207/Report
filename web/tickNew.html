@@ -113,9 +113,6 @@
             };
 
             $scope.onReportDataComplete = function() {
-                var columnTypes = ["text", "number", "number", "number"];
-                reportTable1.setReportColumns(myDataLoad.loadCh, columnTypes);
-                reportTable2.setReportColumns(myDataLoad.loadCh, columnTypes);
                 reportDataManager.setDataSource(myDataLoad.loadC);
             }
         }

@@ -11,7 +11,7 @@ var DataLoad = {
         dl.loadCh = [];
         dl.loadingGif = null;
         dl.loadType = "report";
-
+        //jQuery.support.cors = true;
         dl.appendLoadingGif = function () {
             var htmlStr = "<div id='loadinggif' style='left:50%;top:50%;z-index:100;position: fixed; background-color: rgba(255, 255, 255, 0.9); display:block' >";
             htmlStr += "<center><img src='image/ajax-loader.gif'></center></div>";
@@ -61,11 +61,13 @@ var DataLoad = {
             var list = dl.dataSource.c.split(DataLoad.rowSymbol);
             var count = list.length;
             var obj = null;
+            var row = null;
             for (var i = 0; i < count; i++) {
                 obj = {};
-                list[i].split(DataLoad.colSymbol).forEach(function (elm, index, array) {
-                    obj["column" + index] = elm;
-                });
+                row = list[i].split(DataLoad.colSymbol);
+                for(var j=0;j<row.length;j++){
+                    obj["column" + j] = row[j];
+                }
                 dl.loadC.push(obj);
             }
         };
@@ -75,11 +77,13 @@ var DataLoad = {
             var list = dl.dataSource.c.split(DataLoad.rowSymbol);
             var count = list.length;
             var obj = null;
+            var row = null;
             for (var i = 0; i < count; i++) {
                 obj = [];
-                list[i].split(DataLoad.colSymbol).forEach(function (elm, index, array) {
-                    obj.push(elm);
-                });
+                row = list[i].split(DataLoad.colSymbol);
+                for(var j=0;j<row.length;j++){
+                    obj.push(row[j]);
+                }
                 dl.loadC.push(obj);
             }
         };
