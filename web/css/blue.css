@@ -49,10 +49,20 @@ body {
 	background: #FFFFFF;
 }
 
+select::-ms-expand {
+	display: none;
+}
+
 select {
-	-webkit-appearance: button;
+	-moz-appearance:none; /* Firefox */
+	-webkit-appearance:none; /* Safari ©M Chrome */
 	-webkit-border-radius: 2px;
+	-moz-border-radius: 2px;
+	background-image: url(images/select_down.png), -ms-linear-gradient(#A5DAEA, #A5DAEA 95%, #1857A9);
 	background-image: url(images/select_down.png), -webkit-linear-gradient(#A5DAEA, #A5DAEA 95%, #1857A9);
+	background-image: url(images/select_down.png), -moz-linear-gradient(#A5DAEA, #A5DAEA 95%, #1857A9);
+	background-image: url(images/select_down.png), -o-linear-gradient(#A5DAEA, #A5DAEA 95%, #1857A9);
+	background-image: url(images/select_down.png), linear-gradient(#A5DAEA, #A5DAEA 95%, #1857A9);
 	background-position: 97% center;
 	background-repeat: no-repeat;
 	border-radius: 2px;
