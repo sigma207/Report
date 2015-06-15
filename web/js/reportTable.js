@@ -121,30 +121,56 @@ var ReportDataManager = {
         };
 
         rdm.initPageButtonEvent = function () {
-            $("#pagedownbtn").click(function () {
+            rdm.pageNextBtn = $("#pagedownbtn");
+            rdm.pagePrevBtn = $("#pageupbtn");
+            rdm.pageFirstBtn = $("#fpagebtn");
+            rdm.pageLastBtn = $("#lpagebtn");
+            rdm.pageNextBtn.click(function () {
                 if (rdm.pageNo < rdm.getPageTotal() - 1) {
                     rdm.pageNo++;
                     rdm.renderTableDom();
                 } else {
-                    alert("抱歉!最後一頁囉");
+                    //alert("抱歉!最後一頁囉");
                 }
             });
-            $("#pageupbtn").click(function () {
+            rdm.pagePrevBtn.click(function () {
                 if (rdm.pageNo > 0) {
                     rdm.pageNo--;
                     rdm.renderTableDom();
                 } else {
-                    alert("抱歉!第一頁囉");
+                    //alert("抱歉!第一頁囉");
                 }
             });
-            $("#fpagebtn").click(function () {
+            rdm.pageFirstBtn.click(function () {
                 rdm.pageNo = 0;
                 rdm.renderTableDom();
             });
-            $("#lpagebtn").click(function () {
+            rdm.pageLastBtn.click(function () {
                 rdm.pageNo = rdm.getPageTotal() - 1;
                 rdm.renderTableDom();
             });
+
+        };
+
+        rdm.pageBtnStatus = function () {
+            rdm.pageNextBtn.attr('disabled', 'disabled');
+            rdm.pagePrevBtn.attr('disabled', 'disabled');
+            rdm.pageFirstBtn.attr('disabled', 'disabled');
+            rdm.pageLastBtn.attr('disabled', 'disabled');
+            if(rdm.getPageTotal()>1){
+                if(rdm.pageNo==0){
+                    rdm.pageNextBtn.removeAttr('disabled');
+                    rdm.pageLastBtn.removeAttr('disabled');
+                } else if(rdm.pageNo==rdm.getPageTotal()-1){
+                    rdm.pagePrevBtn.removeAttr('disabled');
+                    rdm.pageFirstBtn.removeAttr('disabled');
+                } else{
+                    rdm.pageNextBtn.removeAttr('disabled');
+                    rdm.pageLastBtn.removeAttr('disabled');
+                    rdm.pagePrevBtn.removeAttr('disabled');
+                    rdm.pageFirstBtn.removeAttr('disabled');
+                }
+            }
         };
 
         rdm.renderTableDom = function () {
@@ -158,6 +184,7 @@ var ReportDataManager = {
 
         rdm.renderPageInfo = function () {
             $("#pageIdxCount").text((rdm.pageNo + 1) + "/" + rdm.getPageTotal());
+            rdm.pageBtnStatus();
         };
 
         return rdm;

@@ -10,7 +10,7 @@ input, textarea, select, option, button, table {
 
 body {
 
-	height: 100%;
+    height: 100%;
 }
 
 .reporttable {
@@ -54,8 +54,8 @@ select::-ms-expand {
 }
 
 select {
-    -moz-appearance:none; /* Firefox */
-    -webkit-appearance:none; /* Safari ©M Chrome */
+    -moz-appearance: none; /* Firefox */
+    -webkit-appearance: none; /* Safari ©M Chrome */
     -webkit-border-radius: 2px;
     -moz-border-radius: 2px;
     background-image: url(images/select_down.png), -ms-linear-gradient(#E0BDC0, #E0BDC0 95%, #B66269);
@@ -147,10 +147,22 @@ button:active {
     top: 1px;
 }
 
-.timeOption{
-    width:45px;
-    padding-right:0;
-    padding-left:3px;
+button:disabled {
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0.05, #ffeaec), color-stop(1, #f9c4c9));
+    background: -moz-linear-gradient(top, #ffeaec 5%, #f9c4c9 100%);
+    background: -webkit-linear-gradient(top, #ffeaec 5%, #f9c4c9 100%);
+    background: -o-linear-gradient(top, #ffeaec 5%, #f9c4c9 100%);
+    background: -ms-linear-gradient(top, #ffeaec 5%, #f9c4c9 100%);
+    background: linear-gradient(to bottom, #ffeaec 5%, #f9c4c9 100%);
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ffeaec', endColorstr='#f9c4c9', GradientType=0);
+    background-color: #ffeaec;
+    cursor: default;
+}
+
+.timeOption {
+    width: 45px;
+    padding-right: 0;
+    padding-left: 3px;
 }
 
 .arrowDiv {

@@ -147,6 +147,18 @@ button:active {
 	top: 1px;
 }
 
+button:disabled {
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0.05, #b8efff), color-stop(1, #62b6f5));
+	background: -moz-linear-gradient(top, #b8efff 5%, #62b6f5 100%);
+	background: -webkit-linear-gradient(top, #b8efff 5%, #62b6f5 100%);
+	background: -o-linear-gradient(top, #b8efff 5%, #62b6f5 100%);
+	background: -ms-linear-gradient(top, #b8efff 5%, #62b6f5 100%);
+	background: linear-gradient(to bottom, #b8efff 5%, #62b6f5 100%);
+	filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#b8efff', endColorstr='#62b6f5', GradientType=0);
+	background-color: #b8efff;
+	cursor: default;
+}
+
 .timeOption{
 	width:45px;
 	padding-right:0;
