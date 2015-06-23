@@ -42,7 +42,11 @@ var DataLoad = {
             }).error(function (jqXHR, textStatus, errorThrown) {
                 dl.hideLoading();
                 if (jqXHR.getResponseHeader("Content-Length") == null || jqXHR.getResponseHeader("Content-Length") == "0") {
-                    alert("查無資料！");
+                    //alert("查無資料！");
+                    //亨利說不要alert
+                    if (dl.loadType == "report") {
+                        dl.loadC = [];
+                    }
                 } else {
                     alert("Service API Error [" + textStatus + "]" + jqXHR);
                 }

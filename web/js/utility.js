@@ -1,7 +1,7 @@
 /**
  * Created by user on 2015/5/13.
  */
-var baseUrl = "http://122.152.162.81:8080/cfdcreativebo/query/";
+var baseUrl = "http://r1gw.ip305.com:8081/cfdcreativebo/query/";
 var css = "red";
 //var css = "blue";
 //var css = "black";

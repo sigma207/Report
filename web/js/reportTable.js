@@ -23,9 +23,7 @@ var ReportDataManager = {
             rdm.clearSort();
             rdm.refresh();
 
-            if (!rdm.pageInit) {
-                rdm.addPageController();
-            }
+
             if (rdm.usePage) {
                 rdm.renderPageInfo();
             }
@@ -187,6 +185,9 @@ var ReportDataManager = {
             rdm.pageBtnStatus();
         };
 
+        if (!rdm.pageInit) {
+            rdm.addPageController();
+        }
         return rdm;
     }
 };
